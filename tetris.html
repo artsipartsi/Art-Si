@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        canvas { border: 2px solid black; }
+    </style>
+</head>
+<body>
+    <h1>Tetris</h1>
+    <canvas id="tetris" width="300" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("tetris");
+        const ctx = canvas.getContext("2d");
+        const ROWS = 20;
+        const COLS = 10;
+        const BLOCK_SIZE = 30;
+        const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+
+        const tetrominoes = [
+            [[1, 1, 1, 1]],
+            [[1, 1], [1, 1]],
+            [[0, 1, 0], [1, 1, 1]],
+            [[1, 1, 0], [0, 1, 1]],
+            [[0, 1, 1], [1, 1, 0]],
+            [[1, 1, 1], [0, 0, 1]],
+            [[1, 1, 1], [1, 0, 0]]
+        ];
+        
+        let tetromino = getRandomTetromino();
+        let pos = { x: 3, y: 0 };
+
+        function getRandomTetromino() {
+            return tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
+        }
+
+        function drawBlock(x, y, color = "blue") {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.strokeStyle = "black";
+            ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            board.forEach((row, y) => row.forEach((cell, x) => { if (cell) drawBlock(x, y); }));
+            tetromino.forEach((row, dy) => row.forEach((cell, dx) => {
+                if (cell) drawBlock(pos.x + dx, pos.y + dy, "red");
+            }));
+        }
+
+        function moveTetromino(dx, dy) {
+            pos.x += dx;
+            pos.y += dy;
+            drawBoard();
+        }
+
+        function dropTetromino() {
+            moveTetromino(0, 1);
+            setTimeout(dropTetromino, 500);
+        }
+        
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "ArrowLeft") moveTetromino(-1, 0);
+            if (e.key === "ArrowRight") moveTetromino(1, 0);
+            if (e.key === "ArrowDown") moveTetromino(0, 1);
+        });
+        
+        drawBoard();
+        dropTetromino();
+    </script>
+</body>
+</html>
