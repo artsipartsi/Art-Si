@@ -37,6 +37,10 @@
             return tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
         }
 
+        function rotateTetromino(matrix) {
+            return matrix[0].map((_, i) => matrix.map(row => row[i]).reverse());
+        }
+
         function drawBlock(x, y, color = "blue") {
             ctx.fillStyle = color;
             ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
@@ -52,8 +56,8 @@
             }));
         }
 
-        function isValidMove(dx, dy) {
-            return tetromino.every((row, dyOffset) =>
+        function isValidMove(dx, dy, newTetromino = tetromino) {
+            return newTetromino.every((row, dyOffset) =>
                 row.every((cell, dxOffset) => {
                     if (!cell) return true;
                     let newX = pos.x + dxOffset + dx;
@@ -77,8 +81,18 @@
             tetromino.forEach((row, dy) => row.forEach((cell, dx) => {
                 if (cell) board[pos.y + dy][pos.x + dx] = 1;
             }));
+            removeFullRows();
             tetromino = getRandomTetromino();
             pos = { x: 3, y: 0 };
+        }
+
+        function removeFullRows() {
+            for (let y = ROWS - 1; y >= 0; y--) {
+                if (board[y].every(cell => cell)) {
+                    board.splice(y, 1);
+                    board.unshift(Array(COLS).fill(0));
+                }
+            }
         }
 
         function dropTetromino() {
@@ -90,6 +104,10 @@
             if (e.key === "ArrowLeft" && isValidMove(-1, 0)) moveTetromino(-1, 0);
             if (e.key === "ArrowRight" && isValidMove(1, 0)) moveTetromino(1, 0);
             if (e.key === "ArrowDown") moveTetromino(0, 1);
+            if (e.key === " ") {
+                let rotated = rotateTetromino(tetromino);
+                if (isValidMove(0, 0, rotated)) tetromino = rotated;
+            }
         });
         
         drawBoard();
