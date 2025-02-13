@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PONG-peli</title>
+    <style>
+        body { text-align: center; background-color: black; }
+        canvas { background: white; display: block; margin: auto; }
+    </style>
+</head>
+<body>
+    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById("pongCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const paddleWidth = 10, paddleHeight = 80;
+        let playerY = (canvas.height - paddleHeight) / 2;
+        let aiY = (canvas.height - paddleHeight) / 2;
+        let ballX = canvas.width / 2, ballY = canvas.height / 2;
+        let ballSpeedX = 4, ballSpeedY = 4;
+        const paddleSpeed = 8;
+
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "ArrowUp" && playerY > 0) playerY -= paddleSpeed;
+            else if (event.key === "ArrowDown" && playerY < canvas.height - paddleHeight) playerY += paddleSpeed;
+        });
+
+        function update() {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballY <= 0 || ballY >= canvas.height) ballSpeedY = -ballSpeedY;
+            if (ballX <= paddleWidth && ballY > playerY && ballY < playerY + paddleHeight) ballSpeedX = -ballSpeedX;
+            if (ballX >= canvas.width - paddleWidth && ballY > aiY && ballY < aiY + paddleHeight) ballSpeedX = -ballSpeedX;
+            if (ballX < 0 || ballX > canvas.width) resetBall();
+
+            aiY += (ballY - (aiY + paddleHeight / 2)) * 0.1;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
+            ctx.fillRect(canvas.width - paddleWidth, aiY, paddleWidth, paddleHeight);
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = -ballSpeedX;
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
